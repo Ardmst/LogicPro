@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogikaPro | Python Edition</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --card-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+        /* --- Navigation --- */
+        nav {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); }
+        .logo span { color: var(--accent); }
+
+        .nav-links button {
+            background: none; border: none; font-size: 1rem; margin-left: 1.5rem; cursor: pointer;
+            color: var(--text); font-weight: 600; position: relative; transition: color 0.3s;
+        }
+
+        .nav-links button:hover, .nav-links button.active { color: var(--primary); }
+        
+        .nav-links button::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
+            background-color: var(--primary); transition: width 0.3s;
+        }
+        .nav-links button:hover::after, .nav-links button.active::after { width: 100%; }
+
+        /* --- Containers & Sections --- */
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        
+        .section { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .section.active { display: block; opacity: 1; animation: fadeIn 0.6s forwards; }
+
+        /* --- Home/Landing --- */
+        .hero { text-align: center; padding: 4rem 1rem; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; min-height: 3.5rem; }
+        .hero p { font-size: 1.2rem; color: #64748b; margin-bottom: 2rem; }
+        .btn-start {
+            padding: 12px 30px; background: var(--primary); color: white; border: none; border-radius: 8px;
+            font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
+
+        /* --- Materi Cards (Grid) --- */
+        .grid-materi { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: var(--card-bg); padding: 2rem; border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-left: 5px solid var(--primary);
+            transition: transform 0.3s; cursor: pointer;
+        }
+        .card:hover { transform: translateY(-5px); background-color: #f8fafc; }
+        .card h3 { margin-bottom: 0.5rem; color: var(--secondary); }
+        .card p { line-height: 1.6; color: #475569; }
+
+        /* --- Simulasi Grid System (NEW) --- */
+        .sim-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* 2 Kolom responsif */
+            gap: 1.5rem;
+        }
+
+        .sim-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary);
+            display: flex; flex-direction: column;
+        }
+
+        .sim-header { margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .sim-header h3 { font-size: 1.2rem; color: var(--secondary); }
+        .sim-header p { font-size: 0.85rem; color: #64748b; }
+
+        .sim-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        
+        .controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .controls button { flex:1; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .controls button.btn-pop { background: #ef4444; }
+
+        /* Visualisasi Khusus */
+        .visual-box {
+            background: #f1f5f9; border: 2px dashed #cbd5e1;
+            border-radius: 8px; min-height: 120px; padding: 10px;
+            display: flex; align-items: center; justify-content: center;
+            overflow-x: auto; gap: 5px;
+        }
+
+        /* LIFO vs FIFO Items */
+        .box-item {
+            width: 50px; height: 50px; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white; border-radius: 6px;
+            animation: zoomIn 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bg-lifo { background: #f59e0b; } /* Orange */
+        .bg-fifo { background: #10b981; } /* Green */
+
+        /* Sequence Blocks */
+        .seq-block {
+            background: #334155; color: white; padding: 10px; margin: 5px 0;
+            border-radius: 5px; font-family: monospace; cursor: pointer;
+            transition: transform 0.2s; position: relative;
+        }
+        .seq-block:hover { transform: scale(1.02); }
+        .seq-number { 
+            background: var(--primary); width: 24px; height: 24px; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            border-radius: 50%; font-size: 0.8rem; margin-right: 10px;
+        }
+
+        /* Lampu Boolean */
+        .lamp {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #333; box-shadow: inset 0 0 10px #000;
+            transition: all 0.3s; margin: 0 auto;
+        }
+        .lamp.on {
+            background: #facc15;
+            box-shadow: 0 0 30px #facc15, inset 0 0 10px #f59e0b;
+        }
+
+        /* --- Quiz --- */
+        .quiz-container { background: var(--card-bg); padding: 2rem; border-radius: 12px; max-width: 700px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .question-box { margin-bottom: 1.5rem; }
+        .question-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; }
+        .options button {
+            display: block; width: 100%; text-align: left; padding: 12px; margin-bottom: 8px;
+            border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;
+        }
+        .options button:hover { background: #eff6ff; border-color: var(--primary); }
+        .options button.correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+        .options button.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        
+        #score-board { text-align: center; display: none; }
+        #score-board h2 { font-size: 2rem; color: var(--primary); }
+
+        /* --- Modal / Popup Styles --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); z-index: 1000; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: white; width: 90%; max-width: 650px;
+            padding: 2rem; border-radius: 12px; position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.3s ease;
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 1.5rem; border: none; background: none; 
+            cursor: pointer; color: #64748b; transition: color 0.2s;
+        }
+        .close-btn:hover { color: #ef4444; }
+
+        /* Styling untuk Blok Kode (Python Style) */
+        pre {
+            background: #1e293b; color: #e2e8f0; padding: 1rem; 
+            border-radius: 8px; overflow-x: auto; margin-top: 10px;
+            font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; line-height: 1.5;
+        }
+        /* Highlight comment di Python (#) */
+        .comment { color: #64748b; font-style: italic; }
+        .keyword { color: #f472b6; font-weight: bold; } /* pink for keywords */
+        .string { color: #facc15; } /* yellow for strings */
+
+        /* --- Keyframes --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Logika<span>Pro</span></div>
+        <div class="nav-links">
+            <button onclick="navTo('home')" class="active" id="nav-home">Beranda</button>
+            <button onclick="navTo('materi')" id="nav-materi">Belajar</button>
+            <button onclick="navTo('simulasi')" id="nav-simulasi">Simulasi</button>
+            <button onclick="navTo('kuis')" id="nav-kuis">Kuis</button>
+        </div>
+    </nav>
+
+    <div id="home" class="container section active">
+        <div class="hero">
+            <h1 id="typing-text" class="typing-cursor"></h1>
+            <p>Pahami logika dasar pemrograman dengan implementasi <strong>Python</strong>.</p>
+            <button class="btn-start" onclick="navTo('materi')">Mulai Belajar Sekarang</button>
+        </div>
+    </div>
+
+    <div id="materi" class="container section">
+        <h2 style="margin-bottom: 2rem; text-align: center;">Materi Dasar (Python)</h2>
+        
+        <div class="grid-materi">
+            <div class="card" onclick="openModal('sequence')">
+                <h3>1. Sequence (Urutan)</h3>
+                <p>Python membaca kode baris per baris. Indentasi sangat penting!</p>
+            </div>
+            <div class="card" onclick="openModal('boolean')">
+                <h3>2. Boolean (Logika)</h3>
+                <p>True/False, operator <code>and</code>, <code>or</code>, dan <code>not</code>.</p>
+            </div>
+            <div class="card" onclick="openModal('looping')">
+                <h3>3. Looping (Perulangan)</h3>
+                <p><code>for i in range()</code> dan <code>while</code> loop di Python.</p>
+            </div>
+            <div class="card" onclick="openModal('lifo_fifo')">
+                <h3>4. List: Stack vs Queue</h3>
+                <p>Implementasi LIFO dan FIFO menggunakan List Python.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="simulasi" class="container section">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Laboratorium Simulasi</h2>
+        
+        <div class="sim-grid">
+            
+            <div class="sim-card">
+                <div class="sim-header">
+                    <h3>1. Stack (LIFO) vs Queue (FIFO)</h3>
+                    <p>Stack: <code>append()</code> & <code>pop()</code><br>Queue: <code>append()</code> & <code>pop(0)</code></p>
+                </div>
+                <div class="sim-content">
+                    <div class="controls">
+                        <button onclick="addLifo()">+ Stack (Push)</button>
+                        <button onclick="removeLifo()" class="btn-pop">- Stack (Pop)</button>
+                    </div>
+                    <div id="box-lifo" class="visual-box" style="flex-direction: column-reverse; height: 150px; align-items: center;">
+                        <span style="font-size:0.8rem; color:#999;">List Kosong []</span>
+                    </div>
+
+                    <div class="controls" style="margin-top: 10px;">
+                        <button onclick="addFifo()" style="background: #10b981;">+ Queue (Enqueue)</button>
+                        <button onclick="removeFifo()" class="btn-pop">- Queue (Dequeue)</button>
+                    </div>
+                    <div id="box-fifo" class="visual-box" style="justify-content: flex-start; overflow-x: auto;">
+                        <span style="font-size:0.8rem; color:#999; margin: auto;">List Kosong []</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sim-card">
+                <div class="sim-header">
+                    <h3>2. Sequence (Urutan)</h3>
+                    <p>Tukar baris kode Python ini untuk melihat perbedaan hasilnya.</p>
+                </div>
+                <div class="sim-content">
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <strong>x = 10</strong>
+                    </div>
+                    
+                    <div id="seq-container">
+                        <div class="seq-block" id="block-1">
+                            <span class="seq-number">1</span> x = x + 5
+                        </div>
+                        <div class="seq-block" id="block-2">
+                            <span class="seq-number">2</span> x = x * 2
+                        </div>
+                    </div>
+
+                    <button onclick="swapSequence()" style="margin: 10px 0; background: #64748b; color: white; padding: 8px; border:none; border-radius:4px; cursor:pointer;">
+                        ⇅ Tukar Urutan Baris
+                    </button>
+
+                    <button onclick="runSequence()" class="btn-start" style="width: 100%;">Run Python Code</button>
+                    
+                    <div id="seq-result" style="margin-top: 10px; background: #1e293b; color: #facc15; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center;">
+                        # Output muncul disini
+                    </div>
+                </div>
+            </div>
+
+            <div class="sim-card">
+                <div class="sim-header">
+                    <h3>3. Boolean (Python Operators)</h3>
+                    <p>Logika <code>and</code> vs <code>or</code>.</p>
+                </div>
+                <div class="sim-content">
+                    <div style="display: flex; gap: 10px; align-items: center; justify-content: center; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                        <label><input type="checkbox" id="bool-a" onchange="checkBoolean()"> A</label>
+                        <select id="bool-op" onchange="checkBoolean()" style="padding: 5px; border-radius: 4px; font-weight: bold;">
+                            <option value="AND">and</option>
+                            <option value="OR">or</option>
+                        </select>
+                        <label><input type="checkbox" id="bool-b" onchange="checkBoolean()"> B</label>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div id="lamp-indicator" class="lamp"></div>
+                        <p id="lamp-text" style="margin-top: 10px; font-weight: bold; font-family: monospace;">False</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sim-card">
+                <div class="sim-header">
+                    <h3>4. Looping</h3>
+                    <p><code>for i in range()</code> vs <code>while</code>.</p>
+                </div>
+                <div class="sim-content">
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <button onclick="showLoop('for')" style="flex:1; padding: 5px; cursor: pointer; border:1px solid #ccc; background:white;">For Loop</button>
+                        <button onclick="showLoop('while')" style="flex:1; padding: 5px; cursor: pointer; border:1px solid #ccc; background:white;">While Loop</button>
+                    </div>
+
+                    <div id="area-for">
+                        <p style="font-family: monospace; font-size: 0.9rem; margin-bottom:5px;">for i in range( <input type="number" id="for-input" value="3" max="5" min="1" style="width: 40px;"> ):</p>
+                        <button onclick="runForLoop()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 5px; border-radius: 4px;">Run</button>
+                        <div id="out-for" style="margin-top: 5px; font-size: 0.8rem; height: 80px; overflow-y: auto; background:#eee; padding:5px; font-family: monospace;"></div>
+                    </div>
+
+                    <div id="area-while" style="display: none;">
+                        <p style="font-size: 0.85rem; margin-bottom: 5px;"><code>while dadu != 6:</code></p>
+                        <button onclick="runWhileLoop()" style="width: 100%; background: var(--accent); color: white; border: none; padding: 5px; border-radius: 4px;">Roll Dice</button>
+                        <div id="out-while" style="margin-top: 5px; font-size: 0.8rem; height: 80px; overflow-y: auto; background:#eee; padding:5px; font-family: monospace;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="kuis" class="container section">
+        <div class="quiz-container">
+            <div id="quiz-box">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span>Soal <span id="q-number">1</span>/10</span>
+                    <span>Skor: <span id="current-score">0</span></span>
+                </div>
+                <div class="question-box">
+                    <p id="q-text" class="question-text">Loading Soal...</p>
+                    <div id="q-options" class="options">
+                        </div>
+                </div>
+                <button id="next-btn" class="btn-start" style="display: none; width: 100%;" onclick="nextQuestion()">Lanjut Soal Berikutnya</button>
+            </div>
+
+            <div id="score-board">
+                <h2>Kuis Selesai!</h2>
+                <p>Skor Akhir Kamu:</p>
+                <h1 id="final-score" style="font-size: 4rem; color: var(--primary); margin: 1rem 0;">0</h1>
+                <p id="feedback-text"></p>
+                <button class="btn-start" onclick="resetQuiz()" style="margin-top: 2rem;">Ulangi Kuis</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="materi-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal(null)">&times;</button>
+            <h2 id="modal-title" style="color: var(--primary); margin-bottom: 1rem;">Judul Materi</h2>
+            <div id="modal-body">
+                </div>
+        </div>
+    </div>
+
+    <script>
+
+        // --- 1. DATABASE MATERI (PYTHON VERSION) ---
+        const materiData = {
+            sequence: {
+                title: "1. Sequence (Runtunan)",
+                content: `
+                    <p>Di Python, instruksi dieksekusi dari baris paling atas ke bawah. Python menggunakan <strong>Indentasi</strong> (spasi) untuk mengelompokkan blok kode, bukan kurung kurawal <code>{}</code>.</p>
+                    <br>
+                    <h4>Contoh: Menghitung Luas</h4>
+                    <pre>
+<span class="comment"># Variable Assignment</span>
+panjang = 10
+lebar = 5
+
+<span class="comment"># Proses (Sequence)</span>
+luas = panjang * lebar
+
+<span class="comment"># Output</span>
+print(f"Luas tanah: {luas}") <span class="comment"># Output: 50</span>
+                    </pre>
+                `
+            },
+            boolean: {
+                title: "2. Boolean & Percabangan",
+                content: `
+                    <p>Nilai Boolean di Python ditulis dengan huruf kapital: <code>True</code> dan <code>False</code>. Operator logikanya menggunakan kata bahasa Inggris: <code>and</code>, <code>or</code>, <code>not</code>.</p>
+                    <br>
+                    <h4>Contoh: Login System</h4>
+                    <pre>
+password_benar = "admin123"
+input_user = "admin123"
+
+<span class="comment"># Cek kesamaan</span>
+is_match = (input_user == password_benar)
+
+<span class="comment"># Percabangan (If/Else)</span>
+if is_match:
+    print("Akses Diterima")
+else:
+    print("Password Salah")
+                    </pre>
+                `
+            },
+            looping: {
+                title: "3. Looping (Perulangan)",
+                content: `
+                    <p>Python memiliki sintaks looping yang sangat bersih dan mudah dibaca.</p>
+                    <br>
+                    <h4>A. For Loop (dengan Range)</h4>
+                    <pre>
+<span class="comment"># Mencetak angka 0 sampai 4</span>
+for i in range(5):
+    print(f"Antrian ke-{i}")
+                    </pre>
+                    <br>
+                    <h4>B. While Loop</h4>
+                    <pre>
+bensin = 5
+
+while bensin > 0:
+    print(f"Motor jalan.. Sisa: {bensin} L")
+    bensin -= 1  <span class="comment"># Kurangi bensin</span>
+
+print("Mogok!")
+                    </pre>
+                `
+            },
+            lifo_fifo: {
+                title: "4. Struktur Data: List",
+                content: `
+                    <p>Di Python, kita menggunakan <code>List</code> untuk membuat Stack (LIFO) dan Queue (FIFO).</p>
+                    <hr style="margin: 10px 0; border: 1px solid #eee;">
+                    
+                    <h4>A. Stack (LIFO) - Tumpukan</h4>
+                    <p>Gunakan <code>append()</code> untuk masuk, dan <code>pop()</code> untuk keluar.</p>
+                    <pre>
+tumpukan = []
+tumpukan.append("Buku A")
+tumpukan.append("Buku B") <span class="comment"># Terakhir masuk</span>
+
+item = tumpukan.pop() 
+print(item) <span class="comment"># Output: Buku B</span>
+                    </pre>
+
+                    <hr style="margin: 10px 0; border: 1px solid #eee;">
+
+                    <h4>B. Queue (FIFO) - Antrean</h4>
+                    <p>Gunakan <code>append()</code> untuk masuk, dan <code>pop(0)</code> untuk keluar dari index 0.</p>
+                     <pre>
+antrean = []
+antrean.append("Orang A") <span class="comment"># Masuk duluan</span>
+antrean.append("Orang B")
+
+dilayani = antrean.pop(0) 
+print(dilayani) <span class="comment"># Output: Orang A</span>
+                    </pre>
+                `
+            }
+        };
+
+        // --- 2. LOGIKA SIMULASI (GRID SYSTEM) ---
+
+        // LIFO (Stack) & FIFO (Queue)
+        let lifoData = [];
+        let fifoData = [];
+
+        function addLifo() {
+            if (lifoData.length < 5) {
+                lifoData.push(lifoData.length + 1);
+                renderLifo();
+            }
+        }
+        function removeLifo() {
+            if (lifoData.length > 0) {
+                lifoData.pop(); 
+                renderLifo();
+            }
+        }
+        function renderLifo() {
+            const box = document.getElementById('box-lifo');
+            box.innerHTML = lifoData.length ? '' : '<span style="font-size:0.8rem; color:#999;">List Kosong []</span>';
+            lifoData.forEach(i => {
+                box.innerHTML += `<div class="box-item bg-lifo">${i}</div>`;
+            });
+        }
+
+        function addFifo() {
+            if (fifoData.length < 5) {
+                fifoData.push(fifoData.length + 1);
+                renderFifo();
+            }
+        }
+        function removeFifo() {
+            if (fifoData.length > 0) {
+                fifoData.shift(); 
+                renderFifo();
+            }
+        }
+        function renderFifo() {
+            const box = document.getElementById('box-fifo');
+            box.innerHTML = fifoData.length ? '' : '<span style="font-size:0.8rem; color:#999; margin: auto;">List Kosong []</span>';
+            fifoData.forEach(i => {
+                box.innerHTML += `<div class="box-item bg-fifo" style="margin-right:5px;">${i}</div>`;
+            });
+        }
+
+        // Sequence (Urutan)
+        let sequenceOrder = ['add', 'multiply']; 
+
+        function swapSequence() {
+            sequenceOrder.reverse();
+            const container = document.getElementById('seq-container');
+            const block1 = document.getElementById('block-1'); 
+            const block2 = document.getElementById('block-2'); 
+            
+            container.innerHTML = ''; 
+            if (sequenceOrder[0] === 'add') {
+                container.appendChild(block1); container.appendChild(block2);
+                block1.querySelector('.seq-number').innerText = '1'; block2.querySelector('.seq-number').innerText = '2';
+            } else {
+                container.appendChild(block2); container.appendChild(block1);
+                block2.querySelector('.seq-number').innerText = '1'; block1.querySelector('.seq-number').innerText = '2';
+            }
+            document.getElementById('seq-result').innerText = "# Output muncul disini";
+            document.getElementById('seq-result').style.color = "#facc15";
+        }
+
+        function runSequence() {
+            let x = 10;
+            let outputText = "";
+            
+            if (sequenceOrder[0] === 'add') {
+                // (10 + 5) * 2
+                let step1 = x + 5;
+                let step2 = step1 * 2;
+                outputText = `>>> x = 10\n>>> x = x + 5  # Jadi ${step1}\n>>> x = x * 2  # Jadi ${step2}\n>>> print(x)\n${step2}`;
+                x = step2;
+            } else {
+                // (10 * 2) + 5
+                let step1 = x * 2;
+                let step2 = step1 + 5;
+                outputText = `>>> x = 10\n>>> x = x * 2  # Jadi ${step1}\n>>> x = x + 5  # Jadi ${step2}\n>>> print(x)\n${step2}`;
+                x = step2;
+            }
+            
+            document.getElementById('seq-result').innerHTML = `<pre style="background:transparent; padding:0; margin:0; text-align:left; color:#e2e8f0;">${outputText}</pre>`;
+        }
+
+        // Boolean (Lampu)
+        function checkBoolean() {
+            const a = document.getElementById('bool-a').checked;
+            const b = document.getElementById('bool-b').checked;
+            const op = document.getElementById('bool-op').value;
+            const lamp = document.getElementById('lamp-indicator');
+            const text = document.getElementById('lamp-text');
+            
+            let result = false;
+            if (op === 'AND') result = a && b;
+            else result = a || b;
+            
+            if (result) {
+                lamp.classList.add('on');
+                text.innerText = "True"; text.style.color = "#f59e0b";
+            } else {
+                lamp.classList.remove('on');
+                text.innerText = "False"; text.style.color = "#333";
+            }
+        }
+
+        // Looping
+        function showLoop(type) {
+            document.getElementById('area-for').style.display = (type === 'for') ? 'block' : 'none';
+            document.getElementById('area-while').style.display = (type === 'while') ? 'block' : 'none';
+        }
+
+        function runForLoop() {
+            const val = document.getElementById('for-input').value;
+            const out = document.getElementById('out-for');
+            out.innerHTML = "";
+            if(val > 5) { out.innerHTML = "# Max 5 aja bang."; return; }
+            for(let i=0; i<val; i++) {
+                setTimeout(() => {
+                    out.innerHTML += `> ${i}<br>`;
+                    out.scrollTop = out.scrollHeight;
+                }, i * 200);
+            }
+        }
+
+        function runWhileLoop() {
+            const out = document.getElementById('out-while');
+            out.innerHTML = "# Rolling...<br>";
+            let dadu = 0;
+            let interval = setInterval(() => {
+                dadu = Math.floor(Math.random() * 6) + 1;
+                out.innerHTML += `> Dadu: ${dadu}<br>`;
+                out.scrollTop = out.scrollHeight;
+                if (dadu === 6) {
+                    clearInterval(interval);
+                    out.innerHTML += `<span style="color:green"># Stop (Dapat 6)</span>`;
+                }
+            }, 400);
+        }
+
+        // --- 3. LOGIKA SYSTEM (NAV, MODAL, KUIS) ---
+
+        function openModal(key) {
+            const modal = document.getElementById('materi-modal');
+            const data = materiData[key];
+            if (data) {
+                document.getElementById('modal-title').innerText = data.title;
+                document.getElementById('modal-body').innerHTML = data.content;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.className === 'modal-overlay' || event.target.className === 'close-btn') {
+                document.getElementById('materi-modal').style.display = 'none';
+            }
+        }
+        
+        function navTo(pageId) {
+            document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${pageId}`).classList.add('active');
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            setTimeout(() => {
+                document.getElementById(pageId).classList.add('active');
+            }, 100);
+        }
+
+        // Typing Effect
+        const textToType = "Selamat Datang, Python Learner.";
+        const typeEl = document.getElementById('typing-text');
+        let charIndex = 0;
+        function typeWriter() {
+            if (charIndex < textToType.length) {
+                typeEl.innerHTML += textToType.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        window.onload = typeWriter;
+
+        // --- 4. KUIS DATA (PYTHON SYNTAX) ---
+        const questions = [
+            { q: "Apa output dari: print(10 + 5 * 2)?", opts: ["30", "20", "10", "Error"], a: 1 }, // Sequence math
+            { q: "Manakah penulisan Boolean yang benar di Python?", opts: ["true", "True", "TRUE", "yes"], a: 1 },
+            { q: "Operator logika untuk 'DAN' di Python adalah...", opts: ["&&", "AND", "and", "&"], a: 2 },
+            { q: "Struktur data LIFO (Stack) di Python bisa menggunakan...", opts: ["List", "Dictionary", "Tuple", "Integer"], a: 0 },
+            
+            // HOTS Python
+            { q: "Kode: if True and False: print('A') else: print('B')", opts: ["A", "B", "Error", "AB"], a: 1 },
+            { q: "Antrian printer menggunakan konsep...", opts: ["Stack (LIFO)", "Queue (FIFO)", "Random", "Tree"], a: 1 },
+            { q: "Untuk menambah data ke dalam List menggunakan perintah...", opts: ["push()", "add()", "insert()", "append()"], a: 3 },
+            { q: "Loop: for i in range(3). Berapa kali loop berjalan?", opts: ["2 kali (0,1)", "3 kali (0,1,2)", "3 kali (1,2,3)", "4 kali"], a: 1 },
+            { q: "a = [1, 2]. a.pop(0). Apa isi 'a' sekarang?", opts: ["[1]", "[2]", "[]", "Error"], a: 1 },
+            { q: "Kode: x=10; x=x+5; print(x). Output?", opts: ["10", "15", "5", "x+5"], a: 1 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('q-text').textContent = `${currentQ + 1}. ${q.q}`;
+            document.getElementById('q-number').textContent = currentQ + 1;
+            const optsDiv = document.getElementById('q-options');
+            optsDiv.innerHTML = ''; 
+            q.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            const btns = document.querySelectorAll('#q-options button');
+            btns.forEach(b => b.disabled = true);
+            const correctIndex = questions[currentQ].a;
+            if (selectedIndex === correctIndex) {
+                btnElement.classList.add('correct'); score += 10;
+                document.getElementById('current-score').textContent = score;
+            } else {
+                btnElement.classList.add('wrong');
+                btns[correctIndex].classList.add('correct');
+            }
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            document.getElementById('next-btn').style.display = 'none';
+            if (currentQ < questions.length) loadQuestion();
+            else showResult();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-box').style.display = 'none';
+            document.getElementById('score-board').style.display = 'block';
+            document.getElementById('final-score').textContent = score;
+            let feedback = score >= 80 ? "Python Master!" : "Coba pelajari syntax lagi.";
+            document.getElementById('feedback-text').textContent = feedback;
+        }
+
+        function resetQuiz() {
+            currentQ = 0; score = 0;
+            document.getElementById('current-score').textContent = '0';
+            document.getElementById('quiz-box').style.display = 'block';
+            document.getElementById('score-board').style.display = 'none';
+            loadQuestion();
+        }
+
+        loadQuestion();
+
+    </script>
+</body>
+</html>
